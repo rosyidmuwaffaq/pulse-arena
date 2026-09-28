@@ -33,6 +33,12 @@ Saya memakai Laravel dan Bootstrap karena itu yang paling saya kuasai. Dengan wa
 - Edit event
 - Hapus event (ada konfirmasi dulu, dan ditolak kalau event sudah punya tiket)
 
+**Tampilan**
+
+- Dark Mode dan Light Mode dengan tombol pergantian tema.
+- Preferensi tema disimpan menggunakan `localStorage`, sehingga tetap tersimpan saat halaman dibuka kembali.
+- Warna antarmuka menyesuaikan tema menggunakan CSS Variables.
+
 **API**
 
 - CRUD event
