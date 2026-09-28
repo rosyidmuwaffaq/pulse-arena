@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreEventRequest;
 use App\Models\Event;
 use Illuminate\Http\JsonResponse;
+use App\Http\Requests\UpdateEventRequest;
 
 class EventController extends Controller
 {
@@ -23,6 +24,23 @@ class EventController extends Controller
         $event = Event::create($request->validated());
 
         return response()->json(['data' => $event], 201);
+    }
+
+    public function update(UpdateEventRequest $request, Event $event): JsonResponse
+    {
+    $event->update($request->validated());
+
+    return response()->json(['data' => $event]);
+    }
+
+    public function ranking(): JsonResponse
+    {
+    $base = Event::withCount('tickets');
+
+    return response()->json(['data' => [
+        'most'  => (clone $base)->orderByDesc('tickets_count')->first(),
+        'least' => (clone $base)->orderBy('tickets_count')->first(),
+    ]]);
     }
 
     public function show(Event $event): JsonResponse
