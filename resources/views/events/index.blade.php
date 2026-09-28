@@ -4,8 +4,8 @@
 
 @section('content')
     <section class="hero" data-aos="fade-up">
-        <h1>Kompetisi robotik, satu arena.</h1>
-        <p>Combat robot, line follower, drone racing, dan robo-soccer. Pilih event dan amankan tiketmu.</p>
+        <h1>Kompetisi robotik, <span class="text-nowrap">satu arena.</span></h1>
+        <p>Combat robot, line follower, drone racing, dan robo-soccer. <span class="text-nowrap">Pilih event dan amankan tiketmu.</span></p>
     </section>
 
     <div class="section-label mb-4">EVENT_LIST</div>
