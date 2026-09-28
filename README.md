@@ -19,8 +19,10 @@ Saya memilih Laravel dan Bootstrap karena itu stack yang paling saya kuasai, seh
 - Tiket tidak bisa dipesan jika event sudah kedaluwarsa atau kuota habis
 - Daftar tiket yang sudah dipesan, dengan filter `event_id`, `email`, dan `status`
 - Event dengan tiket terbanyak dan terendah
-- CRUD event (tambah, lihat, ubah, hapus)
+- CRUD event melalui REST API (tambah, lihat, ubah, hapus)
+- Halaman Admin terpisah di `/admin/events` untuk melihat daftar event, statistik tiket terbanyak/terendah, tambah, edit, dan hapus event
 - Event yang sudah memiliki tiket tidak bisa dihapus
+- **Catatan:** Halaman Admin belum dilindungi autentikasi/otorisasi; fitur ini ditujukan untuk demo lokal dan perlu pengamanan sebelum dipublikasikan.
 
 ## Cara menjalankan
 
@@ -47,7 +49,7 @@ Saya memilih Laravel dan Bootstrap karena itu stack yang paling saya kuasai, seh
 ```bash
    php artisan serve
 ```
-   Buka `http://127.0.0.1:8000`.
+   Buka `http://127.0.0.1:8000`. Halaman user: `/` dan `/tickets`. Halaman admin terpisah: `/admin/events` dan `/admin/events/create`.
 
 Struktur tabel juga tersedia di `database/schema.sql`.
 
@@ -63,6 +65,31 @@ Struktur tabel juga tersedia di `database/schema.sql`.
 | GET | `/api/events/ranking` | Event dengan tiket terbanyak dan terendah |
 | POST | `/api/events/{id}/tickets` | Pesan tiket |
 | GET | `/api/tickets` | Daftar tiket, filter: `event_id`, `email`, `status` |
+
+## Status UI
+
+- User: melihat daftar/detail event, memesan tiket, dan melihat daftar tiket yang dipesan. Daftar tiket dimuat otomatis dan dapat difilter berdasarkan email/status.
+- Admin (demo): halaman terpisah dari halaman user; daftar event, tambah event, edit event, hapus event, dan ringkasan event dengan tiket terbanyak/terendah.
+- Filter tiket `event_id`, `email`, dan `status` tersedia melalui API. Antarmuka daftar tiket menampilkan daftar dan menyediakan filter email/status.
+- Belum tersedia login/role Admin maupun autentikasi user.
+
+## Pemetaan persyaratan pengujian
+
+| Persyaratan | Implementasi/status |
+|---|---|
+| UI daftar event dan detail event | Tersedia pada `/` dan `/events/{id}` |
+| UI pemesanan tiket | Tersedia pada halaman detail event |
+| UI daftar tiket yang sudah dipesan | Tersedia di `/tickets`, dimuat otomatis dan dapat difilter email/status |
+| Form penambahan event dan validasi dasar | Tersedia di halaman Admin `/admin/events/create`; validasi API menggunakan Form Request |
+| CRUD Event API | Tersedia: GET, POST, PUT, DELETE `/api/events` |
+| Pemesanan dan daftar tiket + filtering | POST `/api/events/{id}/tickets`; GET `/api/tickets` dengan filter `event_id`, `email`, `status` |
+| Ranking event dengan tiket terbanyak/terendah | GET `/api/events/ranking` |
+| Penolakan pemesanan event kedaluwarsa | Diperiksa pada backend sebelum tiket dibuat |
+| Database SQL dan relasi one-to-many | Tabel `events` dan `tickets`, FK `tickets.event_id` |
+| Validasi dan error handling | Form Request dan respons error API |
+| README, struktur project, dokumentasi | Dijelaskan di README ini; file skema ada di `database/schema.sql` |
+
+**Catatan pengujian:** fitur antarmuka dan API perlu diuji kembali pada lingkungan penguji. Aplikasi demo belum memiliki login/otorisasi; jangan memublikasikan data pemesan asli tanpa menambahkan perlindungan akses.
 
 ## Struktur database
 

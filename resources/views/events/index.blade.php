@@ -8,13 +8,7 @@
         <p>Combat robot, line follower, drone racing, dan robo-soccer. Pilih event dan amankan tiketmu.</p>
     </section>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div class="section-label">EVENT_LIST</div>
-
-        <a href="{{ route('events.create') }}" class="btn-pulse">
-            + Tambah Event
-        </a>
-    </div>
+    <div class="section-label mb-4">EVENT_LIST</div>
 
     <div class="row g-4" id="event-list">
         <div class="col-12 muted">Memuat event...</div>
