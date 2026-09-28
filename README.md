@@ -1,58 +1,115 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Pulse Arena
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikasi pemesanan tiket untuk event kompetisi robotik: combat robot, line follower, drone racing, dan robo-soccer.
 
-## About Laravel
+**Opsi pengerjaan: Opsi 3 (Fullstack).**
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Stack
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- Backend: Laravel 13 (PHP 8.5) sebagai REST API
+- Database: PostgreSQL
+- Frontend: Blade, Bootstrap 5, CSS custom, dan AOS. Data diambil dari API lewat `fetch()`
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Saya memilih Laravel dan Bootstrap karena itu stack yang paling saya kuasai, sehingga aplikasi bisa selesai utuh dalam waktu 24 jam.
 
-## Learning Laravel
+## Fitur
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- Daftar event dan detail event
+- Pemesanan tiket dengan validasi nama dan email
+- Tiket tidak bisa dipesan jika event sudah kedaluwarsa atau kuota habis
+- Daftar tiket yang sudah dipesan, dengan filter `event_id`, `email`, dan `status`
+- Event dengan tiket terbanyak dan terendah
+- CRUD event (tambah, lihat, ubah, hapus)
+- Event yang sudah memiliki tiket tidak bisa dihapus
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Cara menjalankan
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
+1. Clone repo:
 ```bash
-composer require laravel/boost --dev
+   git clone https://github.com/rosyidmuwaffaq/pulse-arena.git
+   cd pulse-arena
+```
+2. Pasang dependency:
+```bash
+   composer install
+```
+3. Siapkan konfigurasi:
+```bash
+   copy .env.example .env
+   php artisan key:generate
+```
+4. Buat database PostgreSQL bernama `arena_rx`, lalu isi `DB_USERNAME` dan `DB_PASSWORD` di `.env`.
+5. Jalankan migration:
+```bash
+   php artisan migrate
+```
+6. Jalankan server:
+```bash
+   php artisan serve
+```
+   Buka `http://127.0.0.1:8000`.
 
-php artisan boost:install
+Struktur tabel juga tersedia di `database/schema.sql`.
+
+## Endpoint API
+
+| Method | URL | Keterangan |
+|---|---|---|
+| GET | `/api/events` | Daftar event |
+| POST | `/api/events` | Tambah event |
+| GET | `/api/events/{id}` | Detail event |
+| PUT | `/api/events/{id}` | Ubah event |
+| DELETE | `/api/events/{id}` | Hapus event (ditolak jika sudah ada tiket) |
+| GET | `/api/events/ranking` | Event dengan tiket terbanyak dan terendah |
+| POST | `/api/events/{id}/tickets` | Pesan tiket |
+| GET | `/api/tickets` | Daftar tiket, filter: `event_id`, `email`, `status` |
+
+## Struktur database
+
+Satu event memiliki banyak tiket (one-to-many), dihubungkan lewat `tickets.event_id`.
+
+```mermaid
+erDiagram
+    EVENTS ||--o{ TICKETS : has
+    EVENTS {
+        bigint id PK
+        string name
+        string division
+        text description
+        string location
+        datetime event_date
+        int price
+        int quota
+    }
+    TICKETS {
+        bigint id PK
+        bigint event_id FK
+        string buyer_name
+        string buyer_email
+        string ticket_code
+        string status
+    }
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Foreign key memakai `RESTRICT`: event tidak bisa dihapus selama masih memiliki tiket, karena tiket adalah data transaksi yang tidak boleh hilang otomatis.
 
-## Contributing
+## Keputusan teknis
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+- Validasi dipisah ke Form Request agar controller tetap singkat.
+- Pemesanan tiket memakai transaksi database dengan `lockForUpdate()`, supaya kuota tidak terlampaui saat dua orang memesan bersamaan.
+- Kode tiket dibuat oleh server, bukan diisi oleh user.
 
-## Code of Conduct
+## Tantangan yang dihadapi
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Tantangan yang dihadapi
 
-## Security Vulnerabilities
+Kendala terbesar justru hal-hal kecil. Beberapa kali aplikasi error atau halaman jadi kosong cuma karena salah ketik, kurang satu tanda baca, atau file yang lupa di-save. Contohnya halaman detail event sempat putih polos, ternyata filenya belum tersimpan. Pernah juga folder view `tickets` belum kebuat, dan method `index` di controller ternyata belum masuk, jadi Laravel bilang method-nya tidak ditemukan.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Dari situ saya belajar membaca pesan error dengan pelan-pelan, karena biasanya penyebabnya sudah disebut di situ (nama file, nama method, atau baris yang bermasalah). Saya juga jadi punya kebiasaan cek `php artisan route:list` dan log Laravel dulu sebelum menebak-nebak.
 
-## License
+## Yang ingin saya tingkatkan
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- Autentikasi user, sehingga halaman "Tiket Saya" tidak perlu pencarian lewat email
+- Pembayaran dan status tiket yang lebih lengkap
+- Automated test untuk aturan pemesanan
+- Pagination pada daftar event

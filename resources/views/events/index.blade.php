@@ -1,54 +1,65 @@
+```php
 @extends('layouts.app')
 
-@section('title', 'Tiket Saya — Pulse Arena')
+@section('title', 'Daftar Event — Pulse Arena')
 
 @section('content')
-    <div class="section-label">TIKET_SAYA</div>
+    <section class="hero" data-aos="fade-up">
+        <h1>Kompetisi robotik, satu arena.</h1>
+        <p>Combat robot, line follower, drone racing, dan robo-soccer. Pilih event dan amankan tiketmu.</p>
+    </section>
 
-    <form id="search-form" class="panel mb-4 d-flex gap-2 flex-wrap" data-aos="fade-up">
-        <input class="form-control flex-grow-1" id="email" type="email" placeholder="Email yang dipakai saat memesan" style="min-width: 240px;">
-        <button class="btn-pulse" type="submit">Cari tiket</button>
-    </form>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="section-label">EVENT_LIST</div>
 
-    <div id="ticket-list">
-        <p class="muted">Masukkan email untuk melihat tiket yang sudah dipesan.</p>
+        <a href="{{ route('events.create') }}" class="btn-pulse">
+            + Tambah Event
+        </a>
+    </div>
+
+    <div class="row g-4" id="event-list">
+        <div class="col-12 muted">Memuat event...</div>
     </div>
 @endsection
 
 @push('scripts')
 <script>
-    const list = document.getElementById('ticket-list');
-
-    document.getElementById('search-form').addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const email = document.getElementById('email').value.trim();
-        if (!email) return;
-
-        list.innerHTML = '<p class="muted">Memuat tiket...</p>';
+    (async () => {
+        const list = document.getElementById('event-list');
 
         try {
-            const { data } = await api('/tickets?email=' + encodeURIComponent(email));
+            const { data } = await api('/events');
 
             if (!data.length) {
-                list.innerHTML = '<p class="muted">Tidak ada tiket untuk email ini.</p>';
+                list.innerHTML = '<div class="col-12 muted">Belum ada event.</div>';
                 return;
             }
 
-            list.innerHTML = data.map((t) => `
-                <div class="ticket-row">
-                    <div class="ticket-stub">${esc(t.ticket_code)}</div>
-                    <div class="ticket-info">
-                        <div>
-                            <strong>${esc(t.event.name)}</strong>
-                            <div class="muted small">${tanggal(t.event.event_date)} · ${esc(t.event.location)}</div>
-                            <div class="muted small">Atas nama ${esc(t.buyer_name)}</div>
-                        </div>
-                        <span class="badge-status">${esc(t.status)}</span>
-                    </div>
-                </div>`).join('');
+            list.innerHTML = data.map((e) => {
+                const remaining = e.quota - e.tickets_count;
+                const expired = new Date(e.event_date) < new Date();
+                const state = expired ? 'Kedaluwarsa' : (remaining <= 0 ? 'Habis' : remaining + ' sisa');
+                const stateClass = expired || remaining <= 0 ? 'state-full' : '';
+
+                return `
+                    <div class="col-md-6 col-lg-4" data-aos="fade-up">
+                        <a href="/events/${e.id}" class="event-card">
+                            <span class="event-tag">${esc(e.division)}</span>
+                            <h3>${esc(e.name)}</h3>
+                            <div class="event-meta">${tanggal(e.event_date)} · ${esc(e.location)}</div>
+                            <div class="event-foot">
+                                <span>${rupiah(e.price)}</span>
+                                <span class="${stateClass}">${state}</span>
+                            </div>
+                        </a>
+                    </div>`;
+            }).join('');
+
+            AOS.refresh();
         } catch (err) {
-            list.innerHTML = `<p class="field-error">${esc(err.message)}</p>`;
+            list.innerHTML = `<div class="col-12 field-error">${esc(err.message)}</div>`;
         }
-    });
+    })();
 </script>
 @endpush
+```
