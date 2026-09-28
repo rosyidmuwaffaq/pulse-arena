@@ -1,4 +1,3 @@
-```php
 @extends('layouts.app')
 
 @section('title', 'Daftar Event — Pulse Arena')
@@ -62,4 +61,3 @@
     })();
 </script>
 @endpush
-```
