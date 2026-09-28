@@ -1,99 +1,94 @@
 # Pulse Arena
 
-Aplikasi pemesanan tiket untuk event kompetisi robotik: combat robot, line follower, drone racing, dan robo-soccer.
+Sistem pemesanan tiket untuk kompetisi robotik. Pengunjung bisa melihat daftar event, memesan tiket, dan melihat tiket yang sudah dipesan. Ada juga halaman admin untuk mengelola event.
 
-**Opsi pengerjaan: Opsi 3 (Fullstack).**
+**Opsi pengerjaan: Opsi 3 (Fullstack)**
+
+## Tema
+
+Pulse Arena adalah platform tiket untuk turnamen robotik dengan empat divisi: combat robot, line follower, drone racing, dan robo-soccer. Nama "pulse" diambil dari sinyal PWM yang dipakai untuk menggerakkan motor dan servo di robot. Tampilannya dibuat gelap dengan aksen biru, seperti panel instrumen.
 
 ## Stack
 
-- Backend: Laravel 13 (PHP 8.5) sebagai REST API
-- Database: PostgreSQL
-- Frontend: Blade, Bootstrap 5, CSS custom, dan AOS. Data diambil dari API lewat `fetch()`
+- **Backend:** Laravel 13 (PHP 8.5), REST API
+- **Database:** PostgreSQL
+- **Frontend:** Blade, Bootstrap 5, CSS custom, AOS. Data diambil dari API lewat `fetch()`
 
-Saya memilih Laravel dan Bootstrap karena itu stack yang paling saya kuasai, sehingga aplikasi bisa selesai utuh dalam waktu 24 jam.
+Saya memakai Laravel dan Bootstrap karena itu yang paling saya kuasai. Dengan waktu 24 jam, saya lebih memilih aplikasi yang jalan utuh daripada mencoba stack baru dan berakhir setengah jadi.
 
 ## Fitur
 
-- Daftar event dan detail event
+**Halaman pengunjung**
+
+- Daftar event dan halaman detail event
 - Pemesanan tiket dengan validasi nama dan email
-- Tiket tidak bisa dipesan jika event sudah kedaluwarsa atau kuota habis
-- Daftar tiket yang sudah dipesan, dengan filter `event_id`, `email`, dan `status`
-- Event dengan tiket terbanyak dan terendah
-- CRUD event melalui REST API (tambah, lihat, ubah, hapus)
-- Halaman Admin terpisah di `/admin/events` untuk melihat daftar event, statistik tiket terbanyak/terendah, tambah, edit, dan hapus event
-- Event yang sudah memiliki tiket tidak bisa dihapus
-- **Catatan:** Halaman Admin belum dilindungi autentikasi/otorisasi; fitur ini ditujukan untuk demo lokal dan perlu pengamanan sebelum dipublikasikan.
+- Pemesanan ditolak jika event sudah lewat atau kuota habis
+- Halaman tiket: menampilkan semua tiket yang sudah dipesan, bisa difilter berdasarkan email dan status
+
+**Halaman admin**
+
+- Daftar event dalam bentuk tabel, lengkap dengan jumlah tiket terjual dibanding kuota
+- Kartu ringkasan event dengan tiket terbanyak dan terendah
+- Tambah event lewat form, dengan validasi
+- Edit event
+- Hapus event (ada konfirmasi dulu, dan ditolak kalau event sudah punya tiket)
+
+**API**
+
+- CRUD event
+- Pemesanan tiket dan daftar tiket dengan filter
+- Endpoint ranking event
+
+Halaman admin belum memakai login. Link-nya juga sengaja tidak dipasang di navigasi pengunjung, jadi dibuka lewat alamat langsung.
+
+## Halaman
+
+| URL | Isi |
+|---|---|
+| `/` | Daftar event |
+| `/events/{id}` | Detail event dan form pemesanan tiket |
+| `/tickets` | Daftar tiket dengan filter email dan status |
+| `/admin/events` | Kelola event: tabel, ringkasan, hapus |
+| `/admin/events/create` | Form tambah event |
+| `/admin/events/{id}/edit` | Form edit event |
 
 ## Cara menjalankan
 
-1. Clone repo:
 ```bash
-   git clone https://github.com/rosyidmuwaffaq/pulse-arena.git
-   cd pulse-arena
+git clone https://github.com/rosyidmuwaffaq/pulse-arena.git
+cd pulse-arena
+composer install
+copy .env.example .env
+php artisan key:generate
 ```
-2. Pasang dependency:
-```bash
-   composer install
-```
-3. Siapkan konfigurasi:
-```bash
-   copy .env.example .env
-   php artisan key:generate
-```
-4. Buat database PostgreSQL bernama `arena_rx`, lalu isi `DB_USERNAME` dan `DB_PASSWORD` di `.env`.
-5. Jalankan migration:
-```bash
-   php artisan migrate
-```
-6. Jalankan server:
-```bash
-   php artisan serve
-```
-   Buka `http://127.0.0.1:8000`. Halaman user: `/` dan `/tickets`. Halaman admin terpisah: `/admin/events` dan `/admin/events/create`.
 
-Struktur tabel juga tersedia di `database/schema.sql`.
+Buat database PostgreSQL bernama `arena_rx`, lalu isi `DB_USERNAME` dan `DB_PASSWORD` di `.env`. Setelah itu:
+
+```bash
+php artisan migrate
+php artisan serve
+```
+
+Buka `http://127.0.0.1:8000`. Untuk halaman admin, buka `http://127.0.0.1:8000/admin/events`. Struktur tabel juga tersedia di `database/schema.sql`.
 
 ## Endpoint API
 
 | Method | URL | Keterangan |
 |---|---|---|
-| GET | `/api/events` | Daftar event |
+| GET | `/api/events` | Daftar event, lengkap dengan jumlah tiket terjual |
 | POST | `/api/events` | Tambah event |
 | GET | `/api/events/{id}` | Detail event |
 | PUT | `/api/events/{id}` | Ubah event |
 | DELETE | `/api/events/{id}` | Hapus event (ditolak jika sudah ada tiket) |
 | GET | `/api/events/ranking` | Event dengan tiket terbanyak dan terendah |
 | POST | `/api/events/{id}/tickets` | Pesan tiket |
-| GET | `/api/tickets` | Daftar tiket, filter: `event_id`, `email`, `status` |
+| GET | `/api/tickets` | Daftar tiket. Filter: `event_id`, `email`, `status` |
 
-## Status UI
+Event yang tidak ditemukan mengembalikan 404. Data yang tidak valid mengembalikan 422 beserta pesan per field. Menghapus event yang sudah punya tiket mengembalikan 409.
 
-- User: melihat daftar/detail event, memesan tiket, dan melihat daftar tiket yang dipesan. Daftar tiket dimuat otomatis dan dapat difilter berdasarkan email/status.
-- Admin (demo): halaman terpisah dari halaman user; daftar event, tambah event, edit event, hapus event, dan ringkasan event dengan tiket terbanyak/terendah.
-- Filter tiket `event_id`, `email`, dan `status` tersedia melalui API. Antarmuka daftar tiket menampilkan daftar dan menyediakan filter email/status.
-- Belum tersedia login/role Admin maupun autentikasi user.
+## Database
 
-## Pemetaan persyaratan pengujian
-
-| Persyaratan | Implementasi/status |
-|---|---|
-| UI daftar event dan detail event | Tersedia pada `/` dan `/events/{id}` |
-| UI pemesanan tiket | Tersedia pada halaman detail event |
-| UI daftar tiket yang sudah dipesan | Tersedia di `/tickets`, dimuat otomatis dan dapat difilter email/status |
-| Form penambahan event dan validasi dasar | Tersedia di halaman Admin `/admin/events/create`; validasi API menggunakan Form Request |
-| CRUD Event API | Tersedia: GET, POST, PUT, DELETE `/api/events` |
-| Pemesanan dan daftar tiket + filtering | POST `/api/events/{id}/tickets`; GET `/api/tickets` dengan filter `event_id`, `email`, `status` |
-| Ranking event dengan tiket terbanyak/terendah | GET `/api/events/ranking` |
-| Penolakan pemesanan event kedaluwarsa | Diperiksa pada backend sebelum tiket dibuat |
-| Database SQL dan relasi one-to-many | Tabel `events` dan `tickets`, FK `tickets.event_id` |
-| Validasi dan error handling | Form Request dan respons error API |
-| README, struktur project, dokumentasi | Dijelaskan di README ini; file skema ada di `database/schema.sql` |
-
-**Catatan pengujian:** fitur antarmuka dan API perlu diuji kembali pada lingkungan penguji. Aplikasi demo belum memiliki login/otorisasi; jangan memublikasikan data pemesan asli tanpa menambahkan perlindungan akses.
-
-## Struktur database
-
-Satu event memiliki banyak tiket (one-to-many), dihubungkan lewat `tickets.event_id`.
+Satu event punya banyak tiket (one-to-many), dihubungkan lewat `tickets.event_id`.
 
 ```mermaid
 erDiagram
@@ -118,23 +113,49 @@ erDiagram
     }
 ```
 
-Foreign key memakai `RESTRICT`: event tidak bisa dihapus selama masih memiliki tiket, karena tiket adalah data transaksi yang tidak boleh hilang otomatis.
+Foreign key memakai `RESTRICT`. Tiket adalah data transaksi, jadi event tidak boleh terhapus begitu saja selama masih ada tiket di dalamnya.
+
+Kolom `status` pada tiket bernilai `valid` secara default. Filter di halaman tiket juga menyediakan `used` dan `cancelled`, tapi belum ada fitur yang mengubah status tiket ke nilai itu.
+
+## Struktur project
+
+```
+app/
+  Http/Controllers/Api/   EventController, TicketController
+  Http/Requests/          validasi (Store/Update event, Store ticket)
+  Models/                 Event, Ticket
+database/
+  migrations/
+  schema.sql
+public/
+  css/, js/               gaya dan helper JavaScript (fungsi api(), format rupiah dan tanggal)
+resources/views/
+  layouts/                app (pengunjung) dan admin
+  events/                 daftar dan detail event
+  tickets/                daftar tiket
+  admin/events/           tabel, tambah, dan edit event
+routes/                   api.php dan web.php
+```
 
 ## Keputusan teknis
 
-- Validasi dipisah ke Form Request agar controller tetap singkat.
-- Pemesanan tiket memakai transaksi database dengan `lockForUpdate()`, supaya kuota tidak terlampaui saat dua orang memesan bersamaan.
-- Kode tiket dibuat oleh server, bukan diisi oleh user.
+- **Form Request** untuk validasi, supaya controller tetap pendek.
+- **Transaksi dan `lockForUpdate()`** saat memesan tiket. Tanpa itu, dua orang yang memesan tiket terakhir di saat bersamaan bisa sama-sama lolos cek kuota.
+- **Kode tiket dibuat server**, bukan dari input user.
+- **Aturan bisnis ada di backend.** Frontend hanya menampilkan hasilnya, jadi aturan tidak bisa dilewati dengan memanggil API langsung.
+- **Halaman admin dipisah** dari halaman pengunjung, dengan layout sendiri.
 
 ## Tantangan yang dihadapi
 
 Kendala terbesar justru hal-hal kecil. Beberapa kali aplikasi error atau halaman jadi kosong cuma karena salah ketik, kurang satu tanda baca, atau file yang lupa di-save. Contohnya halaman detail event sempat putih polos, ternyata filenya belum tersimpan. Pernah juga folder view `tickets` belum kebuat, dan method `index` di controller ternyata belum masuk, jadi Laravel bilang method-nya tidak ditemukan.
 
-Dari situ saya belajar membaca pesan error dengan pelan-pelan, karena biasanya penyebabnya sudah disebut di situ (nama file, nama method, atau baris yang bermasalah). Saya juga jadi punya kebiasaan cek `php artisan route:list` dan log Laravel dulu sebelum menebak-nebak.
+Dari situ saya belajar membaca pesan error pelan-pelan, karena biasanya penyebabnya sudah disebut di situ (nama file, nama method, atau baris yang bermasalah). Saya juga jadi terbiasa cek `php artisan route:list` dan log Laravel dulu sebelum menebak-nebak.
 
 ## Yang ingin saya tingkatkan
 
-- Autentikasi user, sehingga halaman "Tiket Saya" tidak perlu pencarian lewat email
-- Pembayaran dan status tiket yang lebih lengkap
+- Login untuk admin, karena halaman admin sekarang terbuka untuk siapa saja yang tahu alamatnya
+- Login untuk pengunjung, supaya halaman tiket hanya menampilkan tiket milik sendiri (sekarang semua tiket terlihat)
+- Fitur mengubah status tiket (`used`, `cancelled`)
+- Pembayaran
 - Automated test untuk aturan pemesanan
-- Pagination pada daftar event
+- Pagination di daftar event dan daftar tiket
