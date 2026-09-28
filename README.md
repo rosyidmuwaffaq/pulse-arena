@@ -49,19 +49,19 @@ Halaman admin belum memakai login. Link-nya juga sengaja tidak dipasang di navig
 
 ## Screenshot Aplikasi
 
-# 1. Homepage Event
+### 1. Homepage Event
 ![Homepage Event](screenshots/homepage-event.png)
 
-# 2. Pemesanan Tiket
+### 2. Pemesanan Tiket
 ![Ticket Booking](screenshots/ticket-booking.png)
 
-# 3. Daftar Tiket
+### 3. Daftar Tiket
 ![Ticket Listing](screenshots/ticket-listing.png)
 
-# 4. Dashboard Admin
+### 4. Dashboard Admin
 ![Admin Dashboard](screenshots/admin-dashboard.png)
 
-# 5. Light Mode
+### 5. Light Mode
 ![Light Mode](screenshots/light-mode.png)
 
 ## Halaman
