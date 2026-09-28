@@ -24,4 +24,24 @@ class EventController extends Controller
 
         return response()->json(['data' => $event], 201);
     }
+
+    public function show(Event $event): JsonResponse
+    {
+    $event->loadCount('tickets');
+
+    return response()->json(['data' => $event]);
+    }
+
+    public function destroy(Event $event): JsonResponse
+    {
+    if ($event->tickets()->exists()) {
+        return response()->json([
+            'message' => 'Event tidak bisa dihapus karena sudah memiliki tiket.',
+        ], 409);
+    }
+
+    $event->delete();
+
+    return response()->json(null, 204);
+    }
 }
